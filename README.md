@@ -29,6 +29,48 @@ foo_bar: В шаблоне этот текст заменит переменну
 
 ```
 
+### Пример использования:
+
+У нас есть шаблон, и есть группа папок со страницами, которые нужно превратить в html страницы сохраняя пути папок.
+
+```
+.
+├── gulpfile.js
+├── package.json
+└── source
+    ├── content
+    │   └── style.css
+    ├── pages
+    │   ├── index.html
+    │   └── subfolder
+    │       └── second.html
+    └── template
+        └── layout
+            └── index.html
+```
+
+Нам необходимо на основе шаблона 
+` source/template/layout/index.html `
+
+Построить список страниц находящихся в папке 
+`source/pages` сохраняя их структуру папок и уровень вложенности.
 
 
+```js
 
+var gulp = require('gulp');
+var templater = require('gulp-templater');
+
+gulp.task('test', function() {
+    gulp.src([
+            './source/pages/**'  // папки со страницами
+        ])
+        .pipe(templater({
+            layout: 'source/template/layout/index.html', // путь до шаблона
+            dist: 'public', // папка в которую будут сложены готовые страницы
+            source: 'source/pages' // участок пути до папки, который нужно исключить
+        }));
+});
+
+
+```
