@@ -1,16 +1,30 @@
 {
   "name": "gulp-templater",
   "version": "1.0.0",
-  "description": "",
+  "description": "Create html page from layout",
   "main": "index.js",
+  "dependencies": {
+    "gulp-util": "^3.0.4",
+    "through2": "^0.6.5",
+    "mkdirp": "^0.5.1"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "dependencies": {
-    "gulp-util": "^3.0.0",
-    "mkdirp": "^0.5.1",
-    "through2": "^0.6.1"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/avil13/gulp-templater.git"
   },
+  "keywords": [
+    "template",
+    "gulp",
+    "plugin"
+  ],
   "author": "Aleksey Pivkin",
-  "license": "ISC"
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/avil13/gulp-templater/issues"
+  },
+  "homepage": "https://github.com/avil13/gulp-templater"
 }
