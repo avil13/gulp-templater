@@ -41,26 +41,42 @@ module.exports = function(options) {
             arr_path = (dir + '/' + options.dist + new_path[1]).split('/'),
             src = options.source.split('/'),
             res;
-            src.push('');
-            src.push('.');
-            src.push('..');
-            console.log( arr_path );
-        for (var i = 0; i < arr_path.length; i++) {
+        src.push('');
+        src.push('.');
+        for (var i = arr_path.length - 1; i >= 0; i--) {
             if (src.indexOf(arr_path[i]) > -1) {
                 arr_path.splice(i, 1);
             }
         }
 
         res = '/' + arr_path.join('/');
+        console.log(res);
         return res;
     };
 
+    var parse = function(tmpl) {
+        var obj = {},
+            t2 = tmpl.split('====='),
+            t3, t4;
+
+        if (t2.length === 1) {
+            obj['<%content%>'] = t2[0];
+        } else if (t2.length === 2) {
+            obj['<%content%>'] = t2[1];
+            t3 = t2[0].split("\n");
+            for (var i = 0; i < t3.length; i++) {
+                t4 = t3[i].split(':');
+                obj['<%' + t4[0] + '%>'] = t4[1];
+            }
+        }
+        return obj;
+    };
+
     var reTemplate = function(file_path) {
-        var obj = {};
-        var layout = fs.readFileSync(options.layout, 'utf8');
         // получаем исходник,
-        obj['<%content%>'] = fs.readFileSync(file_path, 'utf8');
+        var layout = fs.readFileSync(options.layout, 'utf8');
         // парсим
+        var obj = parse(fs.readFileSync(file_path, 'utf8'));
         // соединяем с шаблоном
         var res = strtr(layout, obj);
         // записываем
