@@ -5,16 +5,35 @@ var fs = require('fs');
 var mkdirp = require("mkdirp");
 var getDirName = require("path").dirname;
 
-//экспортируем функцию, вызывая которую в тасках gulp, пользователь инициирует наш плагин
-module.exports = function(options) {
+// color ===
+var clc = require('cli-color');
+var error = clc.red.bold;
+var warn = clc.yellow;
+var notice = clc.green;
+// end color
 
-    //#section инициализация
-    options = options || {
+
+
+//экспортируем функцию, вызывая которую в тасках gulp, пользователь инициирует наш плагин
+module.exports = function(new_options) {
+
+    //#настройки по дефолту
+    var options = {
         layout: '', // путь до шаблона
         dist: '', // путь начальной папки
-        source: '' // путь до корня страниц
+        source: '', // путь до корня страниц
+        partials: '' // путь до частей шаблонов
     };
-    //#endsection инициализация
+
+    // расширяем объект настроек
+    (function(old_obj, new_obj) {
+        for (var key in new_obj) {
+            old_obj[key] = new_obj[key] || old_obj[key];
+        }
+    })(options, new_options);
+
+
+    // метод для замены переменных
     var strtr = function(str, replacePairs) {
         str = str + '';
         var key, re;
@@ -28,13 +47,7 @@ module.exports = function(options) {
     };
 
 
-    function writeFile(path, contents, cb) {
-        mkdirp(getDirName(path), function(err) {
-            if (err) return cb(err);
-            fs.writeFile(path, contents, cb);
-        });
-    }
-
+    // генерация пути
     var newPath = function(file_path) {
         var dir = process.cwd(),
             new_path = file_path.split(dir),
@@ -50,10 +63,12 @@ module.exports = function(options) {
         }
 
         res = '/' + arr_path.join('/');
-        console.log(res);
+        console.log(notice(res));
         return res;
     };
 
+
+    // парсим файл
     var parse = function(tmpl) {
         var obj = {},
             t2 = tmpl.split('====='),
@@ -72,18 +87,56 @@ module.exports = function(options) {
         return obj;
     };
 
+
+    // части шаблона header footer menu
+    var partials = function() {
+        var part = {};
+
+        if (options.partials) {
+            // читаем содержимое папки
+            var files = fs.readdirSync(options.partials);
+
+            for (var i = 0; i < files.length; i++) {
+                // читаем файлы
+                part['<%%' + strtr(files[i], {
+                    '.html': ''
+                }) + '%%>'] = fs.readFileSync(options.partials + '/' + files[i], 'utf8');
+            }
+        }
+        return part;
+    };
+
+    // запись файла
+    var writeFile = function(path, contents, cb) {
+        mkdirp(getDirName(path), function(err) {
+            if (err) return cb(err);
+            fs.writeFile(path, contents, cb);
+        });
+    };
+
+
+    // перестроение шаблона
     var reTemplate = function(file_path) {
         // получаем исходник,
         var layout = fs.readFileSync(options.layout, 'utf8');
         // парсим
         var obj = parse(fs.readFileSync(file_path, 'utf8'));
+        // получаем список частей шаблона
+        var part = partials();
+
+        // соединяем с шаблоном части
+        layout = strtr(layout, part);
         // соединяем с шаблоном
         var res = strtr(layout, obj);
         // записываем
         writeFile(newPath(file_path), res, function(err) {
-            if (err) console.log(err);
+            if (err) console.log(error(err));
         });
     };
+
+
+    // ###
+
 
     //функция, которую будет вызывать through для каждого файла
     function bufferContents(file, enc, callback) {
@@ -98,6 +151,7 @@ module.exports = function(options) {
         }
         callback();
     }
+
 
     //функция вызывающаяся перед закрытием стрима
     function endStream(callback) {
