@@ -52,7 +52,10 @@ foo_bar: В шаблоне этот текст заменит переменну
  </head>
  <body>
     <%%menu%%>
+    
     <%content%>
+
+    <%foo_bar%>
  </body>
  </html> 
 ```
