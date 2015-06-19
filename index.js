@@ -38,10 +38,8 @@ module.exports = function(new_options) {
         str = str + '';
         var key, re;
         for (key in replacePairs) {
-            if (replacePairs.hasOwnProperty(key)) {
-                re = new RegExp(key, "g");
-                str = str.replace(re, replacePairs[key]);
-            }
+            re = new RegExp(key, "g");
+            str = str.replace(re, replacePairs[key]);
         }
         return str;
     };
@@ -84,6 +82,8 @@ module.exports = function(new_options) {
                 obj['<%' + t4[0] + '%>'] = t4[1];
             }
         }
+        obj['<%.+%>'] = '';
+
         return obj;
     };
 
